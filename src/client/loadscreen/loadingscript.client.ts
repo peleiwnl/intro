@@ -26,7 +26,6 @@ let myVal = 0;
 
 for (const part of parts) {
 	ContentProvider.PreloadAsync([part]);
-	task.wait(0.5);
 	myVal++;
 
 	loadingText.Text = myVal + "/" + allParts;
