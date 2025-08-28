@@ -1,19 +1,38 @@
 import * as spr from "@rbxts/spr";
+import { Players } from "@rbxts/services";
+import { loadingscreen } from "./loadscreen/loading.service";
+import { menuscreen } from "./loadscreen/menu.service";
+const camera = game.Workspace.CurrentCamera as Camera;
 
-task.wait(5);
+function transition_to(position: CFrame | Instance, fn?: () => void) {
+	camera.CameraType = Enum.CameraType.Scriptable;
 
-const camera = game.Workspace.FindFirstChild("Camera") as Camera;
+	let target: CFrame;
+	if (typeIs(position, "Instance")) {
+		const inst = position as BasePart;
+		target = inst.CFrame;
+	} else {
+		target = position as CFrame;
+	}
 
-const currentSubject = camera.CameraSubject;
+	spr.target(camera, 1, 1, { CFrame: target });
 
-camera.CameraSubject = undefined;
+	if (fn) fn();
+}
 
-camera.CFrame = new CFrame(0, 50, 0);
+async function run() {
+	loadingscreen();
 
-const targetPosition = new CFrame(10, 5, 10);
+	const player = Players.LocalPlayer;
+	const playerScripts = player.WaitForChild("PlayerScripts") as PlayerScripts;
+	playerScripts.WaitForChild("PlayerModule").WaitForChild("CameraModule");
 
-spr.target(camera, 2, 0.1, { CFrame: targetPosition });
+	camera.CFrame = new CFrame(0, 50, 0);
 
-task.wait(2);
+	transition_to(new CFrame(10, 5, 10), () => {
+		menuscreen();
+		camera.CameraType = Enum.CameraType.Custom;
+	});
+}
 
-camera.CameraSubject = currentSubject;
+run();
